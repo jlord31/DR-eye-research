@@ -37,4 +37,5 @@ def check_class_distribution(dataset):
         labels = [label for _, label in dataset]
 
     class_counts = Counter(labels)
-    print("Class Distribution:", class_counts)
+    
+    return class_counts
