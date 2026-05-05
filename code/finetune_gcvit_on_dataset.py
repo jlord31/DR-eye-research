@@ -42,14 +42,11 @@ def reset_random_seeds(seed=0):
     torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
-    # =======================
+
     # SETTINGS & SEED RESET
-    # =======================
     reset_random_seeds(42)
 
-    # =======================
     # DATASET & TRANSFORMS
-    # =======================
     img_width, img_height, batch_size, epochs, mixup_alpha, cutmix_alpha, max_grad_norm = 224, 224, 16, 50, 1.0, 1.0, 1.0
 
     p_mix_start,  p_mix_end  = 0.05, 0.5
@@ -96,16 +93,12 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    # =======================
     # DERIVE CLASS NAMES FROM FOLDERS
-    # =======================
     class_names = sorted([d.name for d in os.scandir(data_path) if d.is_dir()])
     train_dataset.classes = class_names
     test_dataset.classes = class_names
 
-    # =======================
     # PLOT CLASS DISTRIBUTION
-    # =======================
     train_counts = Counter(train_labels)
     # map integer label → folder name
     named_train_counts = { class_names[k]: v for k, v in train_counts.items() }
@@ -120,9 +113,7 @@ if __name__ == '__main__':
     num_classes = len(set(train_labels))
     print(f"Number of classes: {num_classes}")
 
-    # =======================
     # MODEL: Fine-tuning ViT
-    # =======================
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
@@ -157,9 +148,7 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
 
-    # =======================
     # TRAINING LOOP
-    # =======================
     train_losses = []
     train_accuracies = []
     val_losses = []
@@ -268,9 +257,7 @@ if __name__ == '__main__':
     plot_accuracy(epochs, train_accuracies, title="Training Accuracy")
     plot_accuracy(epochs, val_accuracies, title="Validation Accuracy")
 
-    # =======================
     # CONFUSION MATRIX
-    # =======================
     print("Generating confusion matrix on test set...")
     all_preds = []
     all_targets = []
@@ -296,9 +283,7 @@ if __name__ == '__main__':
     sensitivity, specificity = calculate_metrics(model=feature_extractor, dataloader=test_loader, device=device)
     plot_sensitivity_specificity(sensitivity, specificity, class_labels=class_names)
 
-    # =======================
     # FEATURE EXTRACTION
-    # =======================
     print("Extracting features using the fine-tuned ViT...")
     feature_extractor.load_state_dict(torch.load(best_model_path))
     feature_extractor.eval()
@@ -311,9 +296,7 @@ if __name__ == '__main__':
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # =======================
     # SAVE FEATURES TO DISK
-    # =======================
     feature_dir = './data/features/all_dataset_gcvit/'
     os.makedirs(feature_dir, exist_ok=True)
     train_feat_path = os.path.join(feature_dir, 'gcvit_X_train.pkl')
